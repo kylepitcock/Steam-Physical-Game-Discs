@@ -17,11 +17,6 @@ This Windows desktop app creates a **launcher-only** CD/DVD for your installed S
 - Steam installed
 - Optical writer drive + blank writable disc
 
-## Run
-
-```powershell
-python steam_cd_launcher.py
-```
 
 ## Optional: auto-launch watcher at startup
 
