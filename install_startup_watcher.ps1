@@ -5,29 +5,36 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$watcherPath = Join-Path $projectDir 'disc_insert_watcher.py'
+$watcherExePath = Join-Path $projectDir 'SteamDiscInsertWatcher.exe'
+$watcherPyPath = Join-Path $projectDir 'disc_insert_watcher.py'
 
-if (-not (Test-Path -LiteralPath $watcherPath)) {
-    throw "Watcher script not found: $watcherPath"
-}
-
-$python = (Get-Command py -ErrorAction SilentlyContinue)
-if ($python) {
-    $exec = 'py'
-    $args = "-3 `"$watcherPath`""
+if (Test-Path -LiteralPath $watcherExePath) {
+    $exec = $watcherExePath
+    $args = ''
 }
 else {
-    $python = (Get-Command pythonw -ErrorAction SilentlyContinue)
-    if (-not $python) {
-        $python = (Get-Command python -ErrorAction SilentlyContinue)
+    if (-not (Test-Path -LiteralPath $watcherPyPath)) {
+        throw "Watcher executable/script not found. Expected: $watcherExePath or $watcherPyPath"
     }
 
-    if (-not $python) {
-        throw 'Python was not found in PATH. Install Python 3.10+ and retry.'
+    $python = (Get-Command py -ErrorAction SilentlyContinue)
+    if ($python) {
+        $exec = 'py'
+        $args = "-3 `"$watcherPyPath`""
     }
+    else {
+        $python = (Get-Command pythonw -ErrorAction SilentlyContinue)
+        if (-not $python) {
+            $python = (Get-Command python -ErrorAction SilentlyContinue)
+        }
 
-    $exec = $python.Source
-    $args = "`"$watcherPath`""
+        if (-not $python) {
+            throw 'Python was not found in PATH. Install Python 3.10+ and retry.'
+        }
+
+        $exec = $python.Source
+        $args = "`"$watcherPyPath`""
+    }
 }
 
 $action = New-ScheduledTaskAction -Execute $exec -Argument $args -WorkingDirectory $projectDir
